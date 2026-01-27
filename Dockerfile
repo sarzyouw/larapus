@@ -1,7 +1,8 @@
 FROM php:7.3-apache
 
-# Fix Apache MPM conflict
-RUN a2dismod mpm_event && a2enmod mpm_prefork
+# Fix Apache MPM conflict (Railway)
+RUN a2dismod mpm_event mpm_worker mpm_prefork \
+    && a2enmod mpm_prefork
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -17,7 +18,7 @@ RUN apt-get update && apt-get install -y \
 # Enable rewrite
 RUN a2enmod rewrite
 
-# Set document root
+# Set document root to public
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
     /etc/apache2/sites-available/*.conf \
@@ -27,7 +28,7 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
 COPY . /var/www/html
 WORKDIR /var/www/html
 
-# Permission
+# Permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
