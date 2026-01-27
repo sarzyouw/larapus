@@ -1,34 +1,39 @@
 FROM php:7.3-apache
 
-# Install system dependencies
+# 1. Install dependencies & PHP Extensions
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
     libpq-dev \
+    libzip-dev \
     zip \
     unzip \
     git \
-    && docker-php-ext-install gd pdo pdo_pgsql \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-install gd pdo pdo_pgsql pdo_mysql zip
 
-# Enable Apache rewrite
-RUN a2enmod rewrite
+# 2. Fix Apache MPM Error & Enable Rewrite
+# Kita pastikan hanya mpm_prefork yang jalan (standar untuk PHP-Apache)
+RUN a2dismod mpm_event || true && a2enmod mpm_prefork rewrite
 
-# Set Apache DocumentRoot ke /public
+# 3. Set DocumentRoot ke /public (Sangat Penting untuk Laravel)
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri \
-    -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
-    /etc/apache2/sites-available/*.conf \
-    /etc/apache2/apache2.conf
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 
-# Copy project
-COPY . /var/www/html
+# 4. Copy Project
+WORKDIR /var/www/html
+COPY . .
 
-# Laravel permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# 5. Permissions & Optimization
+# Kita buat folder storage/cache kalau belum ada agar tidak error chmod
+RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 storage bootstrap/cache
 
-EXPOSE 80
+# Railway menggunakan variable PORT secara dinamis
+# Kita biarkan Apache mengikuti port default Railway (80 atau sesuai variable PORT)
+EXPOSE 8080
+
 CMD ["apache2-foreground"]
