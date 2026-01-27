@@ -12,8 +12,8 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Styles -->
-    <link href="{{ asset('css/font-awesome.min.css') }}" rel='stylesheet' type='text/css'>
-    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/font-awesome.min.css') }}">
     <link href="{{ asset('css/jquery.dataTables.css') }}" rel="stylesheet">
     <link href="{{ asset('css/dataTables.bootstrap.css') }}" rel="stylesheet">
     <link href="{{ asset('css/selectize.css') }}" rel="stylesheet">
