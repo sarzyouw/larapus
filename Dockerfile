@@ -1,10 +1,7 @@
-# ===============================
-# Base Image
-# ===============================
 FROM php:7.3-apache
 
 # ===============================
-# System Dependencies
+# System dependencies
 # ===============================
 RUN apt-get update && apt-get install -y \
     libpng-dev \
@@ -13,24 +10,24 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     unzip \
     git \
+    && docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
     && docker-php-ext-install \
-    pdo \
-    pdo_pgsql \
-    gd \
+        pdo \
+        pdo_pgsql \
+        gd \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # ===============================
-# Apache Configuration
+# Apache modules
 # ===============================
+RUN a2enmod rewrite headers mime
 
-# Enable Apache modules
-RUN a2enmod rewrite mime headers
-
-# Ensure mime types loaded (FIX CSS TEXT ISSUE)
-RUN echo "Include /etc/apache2/mime.types" >> /etc/apache2/apache2.conf
-
-# Set Apache DocumentRoot to Laravel /public
+# ===============================
+# Set DocumentRoot to /public
+# ===============================
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 
 RUN sed -ri \
@@ -39,22 +36,15 @@ RUN sed -ri \
     /etc/apache2/apache2.conf
 
 # ===============================
-# PHP Configuration
-# ===============================
-RUN echo "upload_max_filesize=50M" > /usr/local/etc/php/conf.d/uploads.ini \
- && echo "post_max_size=50M" >> /usr/local/etc/php/conf.d/uploads.ini
-
-# ===============================
-# App Source
+# Workdir & source
 # ===============================
 WORKDIR /var/www/html
 COPY . .
 
 # ===============================
-# Permissions
+# Permissions (Laravel)
 # ===============================
-RUN chown -R www-data:www-data \
-    storage bootstrap/cache \
+RUN chown -R www-data:www-data storage bootstrap/cache \
  && chmod -R 775 storage bootstrap/cache
 
 # ===============================
@@ -68,19 +58,12 @@ RUN composer install \
     --no-interaction
 
 # ===============================
-# Laravel Optimization
+# Laravel optimize
 # ===============================
-RUN php artisan key:generate || true \
- && php artisan config:clear \
+RUN php artisan config:clear \
  && php artisan route:clear \
  && php artisan view:clear
 
 # ===============================
-# Expose Port
-# ===============================
-EXPOSE 80
-
-# ===============================
-# Start Apache
-# ===============================
+EXPOSE 8080
 CMD ["apache2-foreground"]
