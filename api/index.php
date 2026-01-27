@@ -1,8 +1,7 @@
 <?php
-
-// 1. Sembunyikan pesan Deprecated agar tidak menutupi tampilan
-error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
+error_reporting(0);
 ini_set('display_errors', '0');
+
 
 // 2. Load aplikasi Laravel
 require __DIR__ . '/../bootstrap/autoload.php';
