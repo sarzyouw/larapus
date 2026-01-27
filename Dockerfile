@@ -1,22 +1,33 @@
 FROM php:7.3-apache
 
-# Install dependencies
+# ===============================
+# 1. Install system dependencies
+# ===============================
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
+    libpq-dev \
     zip \
     unzip \
-    git
+    git \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd pdo pdo_pgsql \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Enable Apache rewrite
+# ===============================
+# 2. Apache config
+# ===============================
 RUN a2enmod rewrite
 
-# Fix MPM conflict (aman walau tidak ada)
-RUN a2dismod mpm_event mpm_worker || true
-RUN a2enmod mpm_prefork
+# Fix MPM conflict (INI PENTING)
+RUN a2dismod mpm_event mpm_worker || true \
+    && a2enmod mpm_prefork
 
-# Set Apache DocumentRoot ke /public
+# ===============================
+# 3. Set DocumentRoot ke /public
+# ===============================
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 
 RUN sed -ri \
@@ -24,13 +35,20 @@ RUN sed -ri \
     /etc/apache2/sites-available/*.conf \
     /etc/apache2/apache2.conf
 
-# Copy project
+# ===============================
+# 4. Copy project
+# ===============================
 COPY . /var/www/html
+WORKDIR /var/www/html
 
-# Permission
+# ===============================
+# 5. Permission Laravel
+# ===============================
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage
+    && chmod -R 775 storage bootstrap/cache
 
+# ===============================
+# 6. Expose & start
+# ===============================
 EXPOSE 80
-
 CMD ["apache2-foreground"]
