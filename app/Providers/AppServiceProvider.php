@@ -19,9 +19,8 @@ class AppServiceProvider extends ServiceProvider
         Validator::extend('passcheck', function ($attribute, $value, $parameters) {
         return Hash::check($value, $parameters[0]);
         });
-// Jika di Railway (Production), paksa link asset jadi HTTPS
-    if (config('app.env') === 'production') {
-        \Illuminate\Support\Facades\URL::forceScheme('https');
+    if (config('app.env') === 'production' || isset($_SERVER['HTTPS'])) {
+        \Illuminate\Support\Facades\URL::forceSchema('https');
     }
     }
 

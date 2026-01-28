@@ -23,6 +23,9 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 WORKDIR /app
 COPY . .
 
+## Tambahkan ini sebelum composer install agar tidak muncul peringatan root
+ENV COMPOSER_ALLOW_SUPERUSER 1
+
 # Jalankan composer install
 RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
 
