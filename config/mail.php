@@ -100,7 +100,7 @@ return [
     |--------------------------------------------------------------------------
     | Sendmail System Path
     |--------------------------------------------------------------------------
-    |
+    | 
     | When using the "sendmail" driver to send e-mails, we will need to know
     | the path to where Sendmail lives on this server. A default path has
     | been provided here, which will work well on most of your systems.
@@ -108,5 +108,13 @@ return [
     */
 
     'sendmail' => '/usr/sbin/sendmail -bs',
+
+    'stream' => [
+        'ssl' => [
+            'allow_self_signed' => true,
+            'verify_peer' => false,
+            'verify_peer_name' => false,
+        ],
+    ],
 
 ];
