@@ -10,6 +10,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
+    <link rel="icon" href="data:,">
 
     <!-- Styles -->
     <link href="{{ asset('css/font-awesome.min.css') }}" rel='stylesheet' type='text/css'>
