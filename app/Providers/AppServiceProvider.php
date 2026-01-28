@@ -19,7 +19,7 @@ class AppServiceProvider extends ServiceProvider
         Validator::extend('passcheck', function ($attribute, $value, $parameters) {
         return Hash::check($value, $parameters[0]);
         });
-    if (config('app.env') === 'production' || isset($_SERVER['HTTPS'])) {
+    if (config('app.env') === 'production') {
         \Illuminate\Support\Facades\URL::forceSchema('https');
     }
     }

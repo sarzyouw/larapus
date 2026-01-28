@@ -1,8 +1,9 @@
-# Tetap gunakan PHP 7.3 CLI
+# 1. Gunakan PHP 7.3 CLI karena Laravel 5.3 butuh versi PHP lama
 FROM php:7.3-cli
 
-# Install dependencies sistem
-RUN apt-get update && apt-get install -y \
+# 2. Install dependencies sistem & PostgreSQL
+# Ditambahkan --fix-missing untuk mengatasi masalah koneksi saat build
+RUN apt-get update && apt-get install -y --fix-missing \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
@@ -17,24 +18,28 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Composer Versi 1 (Penting untuk Laravel 5.3)
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --1
-
-WORKDIR /app
-COPY . .
-
-## Tambahkan ini sebelum composer install agar tidak muncul peringatan root
+# 3. Pengaturan Composer agar bisa jalan sebagai root di Docker
 ENV COMPOSER_ALLOW_SUPERUSER 1
 
-# Jalankan composer install
+# 4. Install Composer Versi 1 (Wajib untuk Laravel lama agar tidak bentrok)
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --1
+
+# 5. Set Working Directory
+WORKDIR /app
+
+# 6. Copy seluruh project
+COPY . .
+
+# 7. Jalankan Composer Install
+# --ignore-platform-reqs digunakan agar tidak error jika ada ketidakcocokan versi minor PHP
 RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
 
-# Set permissions agar folder storage bisa ditulis
+# 8. Set Permissions untuk Laravel
 RUN chmod -R 775 storage bootstrap/cache public
 
-# Railway biasanya butuh port 8080 atau 80
+# 9. Railway menggunakan port dinamis, namun kita ekspos 8080 sebagai standar
 EXPOSE 8080
 
-# PERBAIKAN UTAMA: Gunakan server.php sebagai entry point
-# server.php di root Laravel berfungsi untuk meniru 'mod_rewrite' Apache
+# 10. Jalankan server dengan server.php sebagai entry point
+# Ini membantu menangani file statis (CSS/JS) di folder public tanpa Apache
 CMD ["php", "-S", "0.0.0.0:8080", "server.php"]
