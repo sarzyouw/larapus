@@ -37,12 +37,6 @@ RUN chmod -R 755 /app/public
 
 EXPOSE 8080
 
-# 1. Tambahkan baris ini untuk migrasi otomatis
-# --force wajib karena di Railway dianggap mode production
-RUN php artisan migrate --force
-
-# 2. Opsional: Tambahkan ini jika kamu mau data awal (seperti admin) otomatis masuk
-RUN php artisan db:seed --force
 
 # 3. Gunakan server.php sebagai gerbang utama
 # Jalankan server dengan flag -t agar folder 'public' dianggap sebagai root aset
