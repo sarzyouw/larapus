@@ -4,9 +4,9 @@
     "api/index.php": {
       "runtime": "vercel-php@0.7.1",
       "phpConfig": {
-        "error_reporting": "E_ALL & ~E_DEPRECATED & ~E_NOTICE",
+        "auto_prepend_file": "api/prepend.php",
         "display_errors": "Off",
-        "log_errors": "On"
+        "error_reporting": "0"
       }
     }
   },

@@ -1,4 +1,4 @@
-# Gunakan PHP 7.3 sesuai permintaan
+# Tetap gunakan PHP 7.3 CLI
 FROM php:7.3-cli
 
 # Install dependencies sistem
@@ -17,22 +17,21 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# 1. INSTALL COMPOSER VERSI 1 (Lebih stabil untuk library PHP lama)
+# Install Composer Versi 1 (Penting untuk Laravel 5.3)
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --1
 
 WORKDIR /app
-
-# 2. COPY SOURCE CODE
 COPY . .
 
-# 3. JALANKAN COMPOSER INSTALL
-# Mantra --ignore-platform-reqs agar tidak rewel soal versi PHP 7.1 vs 7.3
+# Jalankan composer install
 RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
 
-# Set permissions
-RUN chmod -R 775 storage bootstrap/cache
+# Set permissions agar folder storage bisa ditulis
+RUN chmod -R 775 storage bootstrap/cache public
 
+# Railway biasanya butuh port 8080 atau 80
 EXPOSE 8080
 
-# Jalankan server
-CMD php -S 0.0.0.0:8080 -t public
+# PERBAIKAN UTAMA: Gunakan server.php sebagai entry point
+# server.php di root Laravel berfungsi untuk meniru 'mod_rewrite' Apache
+CMD ["php", "-S", "0.0.0.0:8080", "server.php"]

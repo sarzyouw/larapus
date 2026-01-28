@@ -2,8 +2,6 @@
 error_reporting(0);
 ini_set('display_errors', '0');
 
-
-// 2. Load aplikasi Laravel
 require __DIR__ . '/../bootstrap/autoload.php';
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 
@@ -14,5 +12,4 @@ $response = $kernel->handle(
 );
 
 $response->send();
-
 $kernel->terminate($request, $response);
