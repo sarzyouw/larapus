@@ -13,16 +13,19 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
-    {
-        require base_path() . '/app/Helpers/frontend.php';
-        Validator::extend('passcheck', function ($attribute, $value, $parameters) {
+public function boot()
+{
+    require base_path() . '/app/Helpers/frontend.php';
+    
+    Validator::extend('passcheck', function ($attribute, $value, $parameters) {
         return Hash::check($value, $parameters[0]);
-        });
-    if (config('app.env') === 'production') {
+    });
+
+    // Perbaikan di sini: Paksa HTTPS jika di production ATAU jika diakses via port aman
+    if (config('app.env') === 'production' || isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
         \Illuminate\Support\Facades\URL::forceSchema('https');
     }
-    }
+}
 
     /**
      * Register any application services.
