@@ -38,4 +38,5 @@ RUN chmod -R 755 /app/public
 EXPOSE 8080
 
 # 3. Gunakan server.php sebagai gerbang utama
-CMD ["php", "-S", "0.0.0.0:8080", "server.php"]
+# Jalankan server dengan flag -t agar folder 'public' dianggap sebagai root aset
+CMD ["php", "-S", "0.0.0.0:8080", "-t", "public", "server.php"]
