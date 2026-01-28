@@ -24,22 +24,18 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 # 4. Install Composer Versi 1 (Wajib untuk Laravel lama agar tidak bentrok)
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --1
 
-# 5. Set Working Directory
-WORKDIR /app
+# ... (bagian atas tetap sama)
 
-# 6. Copy seluruh project
+WORKDIR /app
 COPY . .
 
-# 7. Jalankan Composer Install
-# --ignore-platform-reqs digunakan agar tidak error jika ada ketidakcocokan versi minor PHP
+# 1. Pastikan Composer install sudah selesai
 RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
 
-# 8. Set Permissions untuk Laravel
-RUN chmod -R 775 storage bootstrap/cache public
+# 2. Paksa izin akses folder public agar bisa dibaca server (PENTING)
+RUN chmod -R 755 /app/public
 
-# 9. Railway menggunakan port dinamis, namun kita ekspos 8080 sebagai standar
 EXPOSE 8080
 
-# 10. Jalankan server dengan server.php sebagai entry point
-# Ini membantu menangani file statis (CSS/JS) di folder public tanpa Apache
+# 3. Gunakan server.php sebagai gerbang utama
 CMD ["php", "-S", "0.0.0.0:8080", "server.php"]
